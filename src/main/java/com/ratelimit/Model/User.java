@@ -1,0 +1,20 @@
+package com.ratelimit.Model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@Entity
+@Table(name = "user_rate")
+public class User implements Serializable {
+
+    @Id()
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private Integer id;
+
+    private String name;
+
+    private int limit;
+}
