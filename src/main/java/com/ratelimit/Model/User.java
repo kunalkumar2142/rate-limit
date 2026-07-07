@@ -16,5 +16,6 @@ public class User implements Serializable {
 
     private String name;
 
+    @Column(name = "request_limit")
     private int limit;
 }
