@@ -17,3 +17,84 @@ A Spring Boot service implementing per-user API rate limiting using the token bu
 6. Tokens refill automatically over time based on each user's configured limit and refill window.
 
 ## Project Structure
+```
+com.ratelimit
+├── Config        → Redis/Redisson and Bucket4j proxy manager configuration
+├── Controller    → REST endpoints
+├── Filter        → Rate limiting enforcement filter
+├── Model         → JPA entities
+├── Repository    → Spring Data JPA repositories
+└── Service       → Business logic (user lookup, rate limiting)
+```
+
+## Setup
+
+### 1. MySQL
+
+Create the database:
+
+```sql
+CREATE DATABASE rate_limit_db;
+```
+
+Schema is auto-created by Hibernate (`ddl-auto=update`) on first run.
+
+### 2. Redis
+
+Run Redis locally via Docker:
+
+```bash
+docker run -d -p 6379:6379 redis
+```
+
+### 3. Configure `application.properties`
+
+```properties
+spring.application.name=rate-limit
+server.port=9090
+
+spring.datasource.url=jdbc:mysql://localhost:3306/rate_limit_db
+spring.datasource.username={your_db_username}
+spring.datasource.password={your_db_password}
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+```
+
+### 4. Run the application
+
+```bash
+mvn spring-boot:run
+```
+
+### 5. Add test users
+
+```sql
+INSERT INTO user_rate (name, request_limit) VALUES
+('user1', 5),
+('user2', 10),
+('premium1', 100);
+```
+
+## Usage
+
+**Endpoint:**
+```
+GET :  /ap1/v1/user
+Header:  X-User-Id : user1
+```
+
+**Behavior:**
+
+| Scenario | Response |
+|---|---|
+| Valid header + tokens available | `200 OK` |
+| Valid header + no tokens left | `429 Too Many Requests` |
+| Missing header | `403 Forbidden` |
+
+## Example
+
+```bash
+curl -H "X-User-Id: user1" http://localhost:9090/api/v1/user
+```
+
+Repeat this call more than 5 times within a minute (for `user1`) to see the rate limit trigger.
