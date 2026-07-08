@@ -58,6 +58,10 @@ spring.datasource.username={your_db_username}
 spring.datasource.password={your_db_password}
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
+
+spring.redis.host=localhost
+spring.redis.port=6379
+caching.spring.userListTTL=60000
 ```
 
 ### 4. Run the application
