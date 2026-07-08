@@ -5,7 +5,6 @@ import com.ratelimit.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RMapCache;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;

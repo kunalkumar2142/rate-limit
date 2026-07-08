@@ -1,3 +1,6 @@
+--not required since ddl-auto=update
+
+
 --CREATE TABLE `user_rate` (
 --	`id` INT(11) NOT NULL AUTO_INCREMENT,
 --	`name` VARCHAR(50) NULL DEFAULT NULL,
