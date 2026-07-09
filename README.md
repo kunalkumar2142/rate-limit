@@ -9,7 +9,6 @@ A Spring Boot service implementing per-user API rate limiting using the token bu
 - **Bucket4j** — token bucket rate limiting algorithm
 
 ## How It Works
-## How It Works
 1. Each user has a request limit defined in the `user_rate` table in MySQL.
 2. User lookups are cached in Redis (via Redisson) with a TTL to avoid hitting the database on every request.
 3. Requests to any `/api/v1/**` endpoint must include an `X-User-Id` header identifying the caller.
@@ -18,7 +17,6 @@ A Spring Boot service implementing per-user API rate limiting using the token bu
 6. Each user's bucket refills its full configured limit at the start of every refill window (1 minute).
 
 > Note: `/api/v2/**` endpoints are intentionally **not** rate-limited — useful for comparing protected vs unprotected behavior.
-
 
 ## Project Structure
 ```
