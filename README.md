@@ -9,12 +9,16 @@ A Spring Boot service implementing per-user API rate limiting using the token bu
 - **Bucket4j** — token bucket rate limiting algorithm
 
 ## How It Works
+## How It Works
 1. Each user has a request limit defined in the `user_rate` table in MySQL.
-2. User lookups are cached in Redis (via Redisson) to avoid hitting the database on every request.
-3. Requests to any `/v1/**` endpoint must include an `X-User-Id` header identifying the caller.
+2. User lookups are cached in Redis (via Redisson) with a TTL to avoid hitting the database on every request.
+3. Requests to any `/api/v1/**` endpoint must include an `X-User-Id` header identifying the caller.
 4. A servlet filter intercepts these requests and checks the caller's token bucket (stored in Redis via Bucket4j) before allowing the request through.
-5. If the bucket has tokens available, the request proceeds and a token is consumed. If not, the request is rejected with `429 Too Many Requests`.
-6. Tokens refill automatically over time based on each user's configured limit and refill window.
+5. If the bucket has tokens available, the request proceeds and one token is consumed. If not, the request is rejected with `429 Too Many Requests`.
+6. Each user's bucket refills its full configured limit at the start of every refill window (1 minute).
+
+> Note: `/api/v2/**` endpoints are intentionally **not** rate-limited — useful for comparing protected vs unprotected behavior.
+
 
 ## Project Structure
 ```
@@ -40,7 +44,6 @@ CREATE DATABASE rate_limit_db;
 Schema is auto-created by Hibernate (`ddl-auto=update`) on first run.
 
 ### 2. Redis
-
 Run Redis locally via Docker:
 
 ```bash
@@ -83,7 +86,7 @@ INSERT INTO user_rate (name, request_limit) VALUES
 
 **Endpoint:**
 ```
-GET :  /ap1/v1/user
+GET :  /api/v1/user
 Header:  X-User-Id : user1
 ```
 
@@ -101,4 +104,4 @@ Header:  X-User-Id : user1
 curl -H "X-User-Id: user1" http://localhost:9090/api/v1/user
 ```
 
-Repeat this call more than 5 times within a minute (for `user1`) to see the rate limit trigger.
+Repeat this call more than 5 times within a minute (for `user1`, limit = 5) to trigger the rate limit and receive `429 Too Many Requests`.
